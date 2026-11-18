@@ -1,22 +1,30 @@
-import { useEffect } from "react";
-import { supabase } from "./lib/supabaseClient";
+import Navigation from "./pages/partials/Navigation";
+import { HomePage } from "./pages/HomePage";
+import { Route, Routes } from "react-router-dom";
+import ExplorePage from "./pages/ExplorePage";
+import MyGamesPage from "./pages/MyGamesPage";
+import ChatPage from "./pages/ChatPage";
+import ProfilePage from "./pages/ProfilePage";
+import LoginPage from "./pages/auth/LoginPage";
 
-function App() {
-    useEffect(() => {
-        async function testConnection() {
-            const { data, error } = await supabase.auth.getSession();
+const App = () => {
+    return (
+        <>
+            {/* Navbaren visas högst upp på alla sidor */}
+            <Navigation />
 
-            if (error) {
-                console.error("❌ Något gick fel:", error.message);
-            } else {
-                console.log("✅ Kopplingen till Supabase fungerar!", data);
-            }
-        }
-
-        testConnection();
-    }, []);
-
-    return <h1>Testar Supabase... (kolla konsolen i webbläsaren)</h1>;
-}
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/explore" element={<ExplorePage />} />
+                    <Route path="/my-games" element={<MyGamesPage />} />
+                    <Route path="/chat" element={<ChatPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                </Routes>
+            </main>
+        </>
+    );
+};
 
 export default App;

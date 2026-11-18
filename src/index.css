@@ -1,1 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;700&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-navy: #13224A;
+  --color-ball: #D9F24B;
+  --font-sans: "Inter", sans-serif;
+  --font-logo: "Bungee", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-navy antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply rounded-md bg-ball px-4 py-2 font-bold text-navy hover:brightness-105;
+  }
+
+  .btn-outline {
+    @apply rounded-md border border-white/60 px-4 py-2 font-bold hover:border-white;
+  }
+}
