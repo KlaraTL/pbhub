@@ -58,7 +58,7 @@ const AuthContextProvider = ({ children }: PropsWithChildren) => {
         setProfile(userData);
     }, [currentUser, getProfileById]);
 
-    // Lyssna på inloggning, utloggning och sidomladdning (refresh)
+    // Lyssna på inloggning, utloggning och sidomladdning
     useEffect(() => {
         let isMounted = true;
 
