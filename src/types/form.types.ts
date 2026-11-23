@@ -14,9 +14,8 @@ export type SignupFormData = {
 
 export type UpdateProfileFormData = {
     firstName?: string;
-    password: string;
     city?: string;
     level?: "nyb" | "med" | "avc";
+    password: string;
+    confirmPassword: string;
 };
-
-

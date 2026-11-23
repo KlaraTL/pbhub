@@ -1,102 +1,92 @@
 import { AuthContext, type Profile } from "./AuthContext";
-
+import { supabase } from "../lib/supabaseClient";
 import { useCallback, useEffect, useState, type PropsWithChildren } from "react";
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "../lib/supabaseClient";
+
+// Hämtar en profil från databasen. Ändrar inget state själv.
+const getProfile = async (userId: string) => {
+    const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+
+    if (error) console.log("Kunde inte hämta profilen:", error);
+    return data as Profile | null;
+};
 
 const AuthContextProvider = ({ children }: PropsWithChildren) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
 
-    // Logga in med e-post och lösenord
+    // Kollar om någon är inloggad
+    const [isLoading, setIsLoading] = useState(true);
+    // Hämtar profilen (namn, ort, nivå och roll)
+    const [isProfileLoading, setIsProfileLoading] = useState(true);
+
     const login = (email: string, password: string) => {
         return supabase.auth.signInWithPassword({ email, password });
     };
 
-    // Logga ut
     const logout = () => {
         return supabase.auth.signOut();
     };
 
-    // Skapa konto. Förnamn, ort och nivå sparas i profiles av triggern i databasen.
     const signup = (email: string, password: string, firstName: string, city: string, level: string) => {
         return supabase.auth.signUp({
             email,
             password,
             options: {
-                data: {
-                    first_name: firstName,
-                    city: city,
-                    level: level,
-                },
+                data: { first_name: firstName, city: city, level: level },
             },
         });
     };
 
-    // Hjälpfunktion för att hämta profilen för ett specifikt userId
-    const getProfileById = useCallback(async (userId: string) => {
-        const { data: userData, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
-
-        if (error) {
-            console.error("Error fetching profile:", error);
-            return null;
-        }
-
-        return userData;
-    }, []);
-
-    // Manuell refresh
+    // Hämtar profilen igen, t.ex. efter att man har sparat på profilsidan
     const refreshProfile = useCallback(async () => {
-        if (!currentUser) {
-            setProfile(null);
-            return;
-        }
+        if (!currentUser) return;
+        const data = await getProfile(currentUser.id);
+        setProfile(data);
+    }, [currentUser]);
 
-        const userData = await getProfileById(currentUser.id);
-        console.log("userdata:", userData);
-        setProfile(userData);
-    }, [currentUser, getProfileById]);
-
-    // Lyssna på inloggning, utloggning och sidomladdning
+    // 1. Lyssna på inloggning och utloggning
     useEffect(() => {
-        let isMounted = true;
-
-        const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (!isMounted) return;
-
-            setIsLoading(true);
-
-            console.log("Authstate changed:", {
-                event,
-                id: session?.user.id,
-                email: session?.user.email,
-            });
+        const { data } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log("Authstate changed:", { event, email: session?.user.email });
 
             const user = session?.user ?? null;
             setCurrentUser(user);
 
-            if (!user) {
+            if (user) {
+                // Någon är inloggad: profilen ska hämtas
+                setIsProfileLoading(true);
+            } else {
+                // Ingen är inloggad: ingen profil
                 setProfile(null);
-                setIsLoading(false);
-                return;
+                setIsProfileLoading(false);
             }
 
-            const userData = await getProfileById(user.id);
-            if (!isMounted) return;
+            setIsLoading(false); // nu vet vi om någon är inloggad
+        });
 
-            console.log("userdata:", userData);
-            setProfile(userData);
-            setIsLoading(false);
+        return () => data.subscription.unsubscribe();
+    }, []);
+
+    // 2. Hämta profilen när användaren ändras.
+    //    State ändras bara i .then, alltså efter att hämtningen är klar.
+    useEffect(() => {
+        if (!currentUser) return;
+
+        let cancelled = false;
+
+        getProfile(currentUser.id).then((data) => {
+            if (cancelled) return; // användaren hann byta, ignorera svaret
+            setProfile(data);
+            setIsProfileLoading(false);
         });
 
         return () => {
-            isMounted = false;
-            data.subscription.unsubscribe();
+            cancelled = true;
         };
-    }, [getProfileById]);
+    }, [currentUser]);
 
-    // Visa en spinner medan vi kollar session och hämtar profil
+    // Spinner medan appen kollar om någon är inloggad
     if (isLoading) {
         return (
             <div className="flex justify-center py-20" role="status">
@@ -112,6 +102,7 @@ const AuthContextProvider = ({ children }: PropsWithChildren) => {
                 currentUser,
                 profile,
                 role: profile?.role ?? null,
+                isProfileLoading,
                 login,
                 logout,
                 signup,

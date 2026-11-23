@@ -17,6 +17,7 @@ export interface AuthContextValue {
     logout: () => Promise<{ error: AuthError | null }>;
     signup: (email: string, password: string, firstName: string, city: string, level: string) => Promise<AuthResponse>;
     refreshProfile: () => Promise<void>;
+    isProfileLoading: boolean;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
