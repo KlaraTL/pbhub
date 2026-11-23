@@ -87,7 +87,7 @@ const ProfilePage = () => {
     };
 
     const inputClass = (hasError: boolean) =>
-        "h-12 w-full rounded-xl border bg-[#1E2A47] px-4 text-base text-white placeholder:text-[#A3AEC4] " +
+        "h-12 w-full min-w-0 rounded-xl border bg-[#1E2A47] px-4 text-base text-white placeholder:text-[#A3AEC4] " +
         "outline-none transition focus:border-[#8AB0E3] focus:ring-4 focus:ring-[#8AB0E3]/25 " +
         (hasError ? "border-red-400" : "border-[#2A3655]");
 
@@ -133,49 +133,57 @@ const ProfilePage = () => {
                     {errorMessage && <p className="mb-6 rounded-xl bg-red-500/15 p-3.5 text-sm font-semibold text-red-300">{errorMessage}</p>}
 
                     <form onSubmit={handleSubmit(onUpdate)} className="flex flex-col gap-6" noValidate>
-                        {/* 4 fält med anpassad bredd på desktop (2 + 5 + 2 + 3 = 12) */}
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
-                            <label className={`${labelClass} lg:col-span-2`}>
-                                Förnamn
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            {/* RAD 1: Förnamn + E-post (från currentUser, ändras ej i updateProfile) */}
+                            <label className={`${labelClass} min-w-0`}>
+                                <span>Förnamn</span>
                                 <input
-                                    autoComplete="given-name"
+                                    type="text"
                                     className={inputClass(!!errors.firstName)}
                                     {...register("firstName", { required: "Skriv ditt förnamn" })}
                                 />
                                 {errors.firstName && <span className="text-xs font-medium text-red-300">{errors.firstName.message}</span>}
                             </label>
 
-                            <label className={`${labelClass} lg:col-span-5`}>
-                                E-post
+                            <label className={`${labelClass} min-w-0`}>
+                                <span>E-post</span>
                                 <input
                                     type="email"
+                                    readOnly
                                     value={currentUser?.email ?? ""}
-                                    disabled
-                                    className={`${inputClass(false)} cursor-not-allowed opacity-70`}
+                                    className={`${inputClass(false)} cursor-default opacity-80`}
                                 />
                             </label>
 
-                            <label className={`${labelClass} lg:col-span-2`}>
-                                Ort
-                                <select className={inputClass(!!errors.city)} {...register("city", { required: "Välj din ort" })}>
-                                    {cities.map((c) => (
-                                        <option key={c.name} value={c.name}>
-                                            {c.name}
-                                        </option>
-                                    ))}
-                                </select>
+                            {/* RAD 2: Ort + Nivå */}
+                            <label className={`${labelClass} min-w-0`}>
+                                <span>Ort</span>
+                                <div className="relative w-full min-w-0">
+                                    <select
+                                        className={`${inputClass(!!errors.city)} appearance-none pr-12`}
+                                        {...register("city", { required: "Välj din ort" })}
+                                    >
+                                        {cities.map((c) => (
+                                            <option key={c.name} value={c.name}>
+                                                {c.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/80">▾</span>
+                                </div>
                                 {errors.city && <span className="text-xs font-medium text-red-300">{errors.city.message}</span>}
                             </label>
 
-                            <label className={`${labelClass} lg:col-span-3`}>
-                                Nivå
-                                <select className={inputClass(false)} {...register("level")}>
-                                    {levels.map((l) => (
-                                        <option key={l.value} value={l.value}>
-                                            {l.label}
-                                        </option>
-                                    ))}
-                                </select>
+                            <label className={`${labelClass} min-w-0`}>
+                                <span>Nivå</span>
+                                <div className="relative w-full min-w-0">
+                                    <select className={`${inputClass(false)} appearance-none pr-12`} {...register("level")}>
+                                        <option value="nyb">Nybörjare</option>
+                                        <option value="med">Medel</option>
+                                        <option value="avc">Avancerad</option>
+                                    </select>
+                                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/80">▾</span>
+                                </div>
                             </label>
                         </div>
 
@@ -191,7 +199,7 @@ const ProfilePage = () => {
                                 </button>
                             ) : (
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <label className={labelClass}>
+                                    <label className={`${labelClass} min-w-0`}>
                                         Nytt lösenord
                                         <input
                                             type="password"
@@ -205,7 +213,7 @@ const ProfilePage = () => {
                                         {errors.password && <span className="text-xs font-medium text-red-300">{errors.password.message}</span>}
                                     </label>
 
-                                    <label className={labelClass}>
+                                    <label className={`${labelClass} min-w-0`}>
                                         Bekräfta nytt lösenord
                                         <input
                                             type="password"

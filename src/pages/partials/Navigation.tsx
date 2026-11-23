@@ -101,7 +101,7 @@ export const Navigation = () => {
 
             {/* HELSKÄRMS-MOBILMENY */}
             {open && (
-                <div className="fixed inset-0 z-50 flex flex-col justify-between bg-[#0F1830] px-6 py-4 text-white md:hidden">
+                <div className="fixed inset-0 z-50 flex flex-col justify-between bg-navy px-6 py-4 text-white md:hidden">
                     {/* Topprad i menyn med logga och tydligt kryss */}
                     <div>
                         <div className="flex items-center justify-between pb-6">
