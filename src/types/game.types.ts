@@ -12,6 +12,7 @@ export interface Game {
         area: string;
         city: string;
         type: "Inomhus" | "Utomhus";
+        image_url: string | null;
     };
     game_participants: { count: number }[];
 }
