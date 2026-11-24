@@ -7,12 +7,15 @@ const LogoutPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        logout().then(() => {
-            navigate("/logga-in", { replace: true });
-        });
+        const handleLogout = async () => {
+            await logout();
+            navigate("/", { replace: true });
+        };
+
+        handleLogout();
     }, [logout, navigate]);
 
-    return <p className="py-10 text-center">Loggar ut...</p>;
+    return <p className="py-20 text-center font-semibold">Loggar ut …</p>;
 };
 
 export default LogoutPage;
